@@ -1,152 +1,69 @@
-// import * as THREE from "three";
+import * as THREE from "three";
 
-// export class Tile {
-//   static instanceMesh = null;
-//   static count = 0;
+const loader = new THREE.TextureLoader();
+const texture = loader.load(
+  "/textures/grass.png",
+  () => console.log("Texture loaded successfully"),
+  undefined,
+  (err) => console.error("Error loading texture:", err)
+);
 
-//   tileHeight = 0.5;
+/**
+ * Represents a Tile
+ * @class Tile
+ */
+export class Tile {
+  /**
+   * @param {THREE.Scene} scene
+   * @param {number} tileSize
+   * @param {number} x
+   * @param {number} z
+   */
+  constructor(scene, tileSize, x, z) {
+    this.scene = scene;
+    this.tileSize = tileSize;
+    this.x = x;
+    this.z = z;
 
-//   constructor(scene, x, z, tileSize, texture = "grass") {
-//     this.scene = scene;
-//     this.x = x;
-//     this.z = z;
-//     this.tileSize = tileSize;
-//     this.tileHeight = 0.5;
-//     this.loader = new THREE.TextureLoader();
+    // Creating Tile
+    this.geometry = new THREE.BoxGeometry(this.tileSize, 0.5, this.tileSize);
+    this.material = new THREE.MeshBasicMaterial({ map: texture });
+    this.tile = new THREE.Mesh(this.geometry, this.material);
 
-//     this.originalMaterial = null;
-//     this.hoverTexture = null;
+    this.tile.userData.parentTile = this;
+    // Creating edges
+    const edges = new THREE.EdgesGeometry(this.geometry);
+    const lines = new THREE.LineSegments(
+      edges,
+      new THREE.LineBasicMaterial({ color: 0x000000 })
+    );
+    this.tile.add(lines);
 
-//     switch (texture) {
-//       case "grass":
-//         this.texture = this.loader.load("textures/grass.png");
-//         break;
-//       case "water":
-//         this.texture = this.loader.load("textures/water.png");
-//         break;
-//       case "soil":
-//         this.texture = this.loader.load("textures/soil.png");
-//         break;
-//       default:
-//         this.texture = this.loader.load("textures/grass.png");
-//     }
+    // Setting position of the tile
+    this.tile.position.set(x, 0, z);
+  }
 
-//     this.texture.wrapS = THREE.RepeatWrapping;
-//     this.texture.wrapT = THREE.RepeatWrapping;
-//     this.texture.repeat.set(1, 1);
+  /**
+   * Change the color of the tile when hovered
+   * @method
+   */
+  onHover() {
+    this.material.color.setHex(0x00ff00); // Green color
+  }
 
-//     if (!Tile.instanceMesh) {
-//       const geometry = new THREE.BoxGeometry(
-//         this.tileSize,
-//         this.tileHeight,
-//         this.tileSize
-//       );
-//       const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  /**
+   * Reset the color of the tile when not hovered
+   * @method
+   */
+  onHoverOut() {
+    this.material.color.setHex(0xffffff); //
+  }
 
-//       Tile.instanceMesh = new THREE.InstancedMesh(geometry, material, 2500); // Max tiles
-//       scene.add(Tile.instanceMesh);
-//     }
-
-//     this.index = Tile.count++;
-//     const matrix = new THREE.Matrix4();
-//     matrix.setPosition(x, -0.25, z);
-//     Tile.instanceMesh.setMatrixAt(this.index, matrix);
-//     Tile.instanceMesh.instanceMatrix.needsUpdate = true;
-
-//     this.tile.position.set(this.x, -0.25, this.z);
-
-//     this.originalMaterial = new THREE.MeshBasicMaterial({ map: this.texture });
-//     this.hoverMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
-//     this.tile.material = this.originalMaterial;
-
-//     const edges = new THREE.EdgesGeometry(geometry);
-//     const linesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
-//     this.lines = new THREE.LineSegments(edges, linesMaterial);
-
-//     this.tile.add(this.lines);
-
-//     this.scene.add(this.tile);
-//   }
-
-//   setHover(isHovered) {
-//     this.tile.material = isHovered ? this.hoverMaterial : this.originalMaterial;
-//   }
-// }
-
-// import * as THREE from "three";
-
-// export class Tile {
-//   static instanceMesh = null;
-//   static count = 0;
-//   static tileSize = 1;
-//   static tileHeight = 0.5;
-
-//   constructor(scene, x, z, tileSize, texture) {
-//     this.scene = scene;
-//     this.x = x;
-//     this.z = z;
-//     this.tileSize = tileSize;
-
-//     if (!Tile.instanceMesh) {
-//       const geometry = new THREE.PlaneGeometry(this.tileSize, this.tileSize);
-
-//       const material = new THREE.ShaderMaterial({
-//         vertexShader: `
-//           varying vec2 vUv;
-//           attribute float isHovered; // 0 or 1
-//           varying float vHover;
-//           void main() {
-//             vUv = uv;
-//             vHover = isHovered;
-//             gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
-//           }
-//         `,
-//         fragmentShader: `
-//           uniform sampler2D tileTexture;
-//           varying vec2 vUv;
-//           varying float vHover;
-//           void main() {
-//             vec4 texColor = texture2D(tileTexture, vUv);
-//             if (vHover > 0.5) {
-//               texColor.rgb *= 1.5; // Brighten color on hover
-//             }
-//             gl_FragColor = texColor;
-//           }
-//         `,
-//         uniforms: {
-//           tileTexture: {
-//             value: new THREE.TextureLoader().load("textures/grass.png"),
-//           },
-//         },
-//       });
-
-//       Tile.instanceMesh = new THREE.InstancedMesh(geometry, material, 2500);
-//       Tile.instanceMesh.instanceHover = new THREE.InstancedBufferAttribute(
-//         new Float32Array(2500), // 1 value per tile (0 = normal, 1 = hovered)
-//         1
-//       );
-
-//       scene.add(Tile.instanceMesh);
-//     }
-
-//     Tile.instanceMesh.geometry.setAttribute(
-//       "isHovered",
-//       new THREE.InstancedBufferAttribute(new Float32Array(2500), 1)
-//     );
-
-//     this.index = Tile.count++;
-
-//     const matrix = new THREE.Matrix4();
-//     matrix.setPosition(x, -0.25, z);
-//     Tile.instanceMesh.setMatrixAt(this.index, matrix);
-
-//     // Set hover state to 0 (not hovered)
-//     Tile.instanceMesh.instanceHover.setX(this.index, 0);
-//     Tile.instanceMesh.instanceHover.needsUpdate = true;
-//     Tile.instanceMesh.instanceMatrix.needsUpdate = true;
-//   }
-
-//   setHover(isHovered) {
-//     this.tile.material = isHovered ? this.hoverMaterial : this.originalMaterial;
-//   }
-// }
+  /**
+   * Log the position of the tile when clicked
+   * @method
+   */
+  onClick() {
+    console.log(`Tile at (${this.x}, ${this.z}) clicked`);
+  }
+}
