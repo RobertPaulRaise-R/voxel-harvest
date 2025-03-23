@@ -30,7 +30,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Create a grid
-const map = new Map(scene, 5, 1, 3);
+const map = new Map(scene, 5, 1, 5);
 const game = new Game(scene, camera, renderer, map);
 
 // Add Lightings

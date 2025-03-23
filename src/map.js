@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import { Grid } from "./grid";
 
 export class Map {
