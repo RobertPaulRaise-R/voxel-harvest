@@ -11,8 +11,9 @@ export class Tile {
    * @param {number} tileSize
    * @param {number} x
    * @param {number} z
+   * @param {string} tileType
    */
-  constructor(scene, tileSize, x, z) {
+  constructor(scene, tileSize, x, z, tileType = "grass_tile2") {
     this.scene = scene;
     this.tileSize = tileSize;
     this.x = x;
@@ -22,7 +23,7 @@ export class Tile {
     this.tile = null;
     this.gltfLoader = new GLTFLoader();
     this.gltfLoader.load(
-      "/models/grass_tile2.glb",
+      `/models/${tileType}.glb`,
       (gltf) => {
         this.tile = gltf.scene;
         this.tile.position.set(x, 0, z);
@@ -32,13 +33,13 @@ export class Tile {
         this.scene.add(gltf.scene);
 
         this.tile.userData.parentTile = this;
+      },
+      (xhr) => {
+        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      },
+      (error) => {
+        console.error("Error loading model:", error);
       }
-      // (xhr) => {
-      //   console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-      // },
-      // (error) => {
-      //   console.error("Error loading model:", error);
-      // }
     );
   }
 

@@ -1,27 +1,21 @@
 import * as THREE from "three";
 import { Grid } from "./grid";
-import { Tile } from "./tile";
 import { Player } from "./player";
+import { Tree } from "./tree";
 
 // Scece setup
 const scene = new THREE.Scene();
 
 // Camera setup
-const aspect = window.innerWidth / window.innerHeight;
-const frustumSize = 10; // Initial zoom level
-
-const camera = new THREE.OrthographicCamera(
-  -frustumSize * aspect,
-  frustumSize * aspect,
-  frustumSize,
-  -frustumSize,
-  1,
-  2000
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
 );
 
 // Adjust the camera to center the map
-camera.position.set(10, 10, 10);
-camera.lookAt(0, 0, 0);
+// camera.position.set(0, 40, );
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -34,7 +28,7 @@ const mouse = new THREE.Vector2();
 let intersectedTile = null;
 
 // Create a Grid
-const grid = new Grid(scene, 7);
+const grid = new Grid(scene, 5);
 const tiles = grid.tiles;
 
 // const gridHelper = new THREE.AxesHelper(5);
@@ -43,11 +37,14 @@ const tiles = grid.tiles;
 // Clock for delta time
 const clock = new THREE.Clock();
 
-// Create a player object
-const player = new Player(scene);
+// Create a tree
+const tree = new Tree(scene);
+
+// Create player
+const player = new Player(scene, [tree]);
+player.tiles = tiles;
 
 // Add the player to the scene
-scene.add(player);
 
 // Add Lightings
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -57,36 +54,26 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(10, 20, 10);
 scene.add(directionalLight);
 
-document.addEventListener("mousemove", (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+// Thrid Persom Camera following the Player
+function updateCamera() {
+  if (!player.player) return;
 
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(tiles.map((tile) => tile.tile));
+  const offset = new THREE.Vector3(0, 5, -5); // Offset behind player
 
-  if (intersects.length > 0 && intersects[0].object.userData.parentTile) {
-    const tile = intersects[0].object.userData.parentTile;
+  // Rotate offset to match player's direction
+  const rotatedOffset = offset
+    .clone()
+    .applyQuaternion(player.player.quaternion);
 
-    if (intersectedTile !== tile) {
-      if (intersectedTile) intersectedTile.onHoverOut();
-      tile.onHover();
-      intersectedTile = tile;
-    }
-  } else {
-    if (intersectedTile) intersectedTile.onHoverOut();
-    intersectedTile = null;
-  }
-});
+  // Desired camera position behind player
+  const targetPosition = player.player.position.clone().add(rotatedOffset);
 
-document.addEventListener("click", (event) => {
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(tiles.map((tile) => tile.tile));
+  // Smoothly move camera to target position
+  camera.position.lerp(targetPosition, 0.1);
 
-  if (intersects.length > 0) {
-    const tile = intersects[0].object.userData.parentTile;
-    tile.onClick();
-  }
-});
+  // Make the camera look at the player
+  camera.lookAt(player.player.position);
+}
 
 // Animation loop
 function animate() {
@@ -94,6 +81,8 @@ function animate() {
 
   const delta = clock.getDelta();
   player.update(delta);
+
+  updateCamera();
 
   renderer.render(scene, camera);
 }

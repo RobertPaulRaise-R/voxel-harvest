@@ -1,3 +1,4 @@
+import { Mesh, MeshBasicMaterial, PlaneGeometry } from "three";
 import { Tile } from "./tile";
 
 /**
