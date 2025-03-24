@@ -1,12 +1,5 @@
 import * as THREE from "three";
-
-const loader = new THREE.TextureLoader();
-const texture = loader.load(
-  "/textures/grass.png",
-  () => console.log("Texture loaded successfully"),
-  undefined,
-  (err) => console.error("Error loading texture:", err)
-);
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 /**
  * Represents a Tile
@@ -26,21 +19,27 @@ export class Tile {
     this.z = z;
 
     // Creating Tile
-    this.geometry = new THREE.BoxGeometry(this.tileSize, 0.5, this.tileSize);
-    this.material = new THREE.MeshBasicMaterial({ map: texture });
-    this.tile = new THREE.Mesh(this.geometry, this.material);
+    this.tile = null;
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.load(
+      "/models/grass_tile2.glb",
+      (gltf) => {
+        this.tile = gltf.scene;
+        this.tile.position.set(x, 0, z);
 
-    this.tile.userData.parentTile = this;
-    // Creating edges
-    const edges = new THREE.EdgesGeometry(this.geometry);
-    const lines = new THREE.LineSegments(
-      edges,
-      new THREE.LineBasicMaterial({ color: 0x000000 })
+        this.tile.scale.set(this.tileSize, this.tileSize / 2, this.tileSize);
+
+        this.scene.add(gltf.scene);
+
+        this.tile.userData.parentTile = this;
+      }
+      // (xhr) => {
+      //   console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      // },
+      // (error) => {
+      //   console.error("Error loading model:", error);
+      // }
     );
-    this.tile.add(lines);
-
-    // Setting position of the tile
-    this.tile.position.set(x, 0, z);
   }
 
   /**

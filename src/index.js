@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { Grid } from "./grid";
+import { Tile } from "./tile";
+import { Player } from "./player";
 
 // Scece setup
 const scene = new THREE.Scene();
@@ -38,13 +40,11 @@ const tiles = grid.tiles;
 // const gridHelper = new THREE.AxesHelper(5);
 // scene.add(gridHelper);
 
-// Create a player object
-const playerGeometry = new THREE.SphereGeometry(0.3, 32, 32); // A small sphere for the player
-const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Black color
-const player = new THREE.Mesh(playerGeometry, playerMaterial);
+// Clock for delta time
+const clock = new THREE.Clock();
 
-// Position the player at the center of the grid
-player.position.set(0, 0.25, 0); // Slightly above the grid to avoid z-fighting
+// Create a player object
+const player = new Player(scene);
 
 // Add the player to the scene
 scene.add(player);
@@ -91,6 +91,10 @@ document.addEventListener("click", (event) => {
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
+
+  const delta = clock.getDelta();
+  player.update(delta);
+
   renderer.render(scene, camera);
 }
 animate();

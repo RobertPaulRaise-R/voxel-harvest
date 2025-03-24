@@ -31,7 +31,6 @@ export class Grid {
 
         const tile = new Tile(this.scene, this.tileSize, posX, posZ);
         this.tiles.push(tile);
-        this.scene.add(tile.tile);
       }
     }
   }
