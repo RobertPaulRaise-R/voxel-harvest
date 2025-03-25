@@ -26,7 +26,6 @@ export class Player {
       });
 
       const rightHand = this.player.getObjectByName("LowerArmR");
-      console.log(rightHand);
       if (rightHand) {
         this.gltfLoader.load("/models/shovel.glb", (gltf) => {
           const shovel = gltf.scene;
@@ -115,8 +114,7 @@ export class Player {
     );
   }
 
-  playPickupSound() {
-    console.log("PLayed");
+  playShovelSound() {
     if (this.sound.isPlaying) this.sound.stop(); // Stop if already playing
     this.sound.play();
   }
@@ -161,9 +159,11 @@ export class Player {
       return;
     }
 
-    if (this.keys["KeyE"]) {
+    if (this.keys["KeyE"] && !this.ePressed) {
       this.playAnimation("PickUp");
-      this.playPickupSound();
+      this.playShovelSound();
+      this.grid.updateTileUnderPlayer();
+      this.ePressed = false;
     } else if (running) {
       this.playAnimation("Run");
     } else if (moving) {

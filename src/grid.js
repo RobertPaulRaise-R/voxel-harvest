@@ -46,12 +46,25 @@ export class Grid {
         }
 
         if (mapData[x][z] === 2) {
-          tile = new Tile(this.scene, this.tileSize, posX, posZ, "soil");
+          tile = new Tile(this.scene, this.tileSize, posX, posZ, "dirt", 0.3);
         }
 
         this.tiles.push(tile);
       }
     }
+  }
+
+  updateTileUnderPlayer() {
+    this.tiles.forEach((tile) => {
+      if (
+        Math.abs(tile.x - this.playerPosition.x) < this.tileSize / 2 &&
+        Math.abs(tile.z - this.playerPosition.z) < this.tileSize / 2
+      ) {
+        setTimeout(() => {
+          tile.updateTexture("dirt"); // Assuming you have a method in Tile to update the texture
+        }, 500);
+      }
+    });
   }
 
   updatePlayerPosition(newX, newZ) {
