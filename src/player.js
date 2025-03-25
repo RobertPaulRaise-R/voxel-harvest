@@ -2,8 +2,9 @@ import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
 
 export class Player {
-  constructor(scene, obstacles = [], grid) {
+  constructor(scene, camera, obstacles = [], grid) {
     this.scene = scene;
+    this.camera = camera;
     this.grid = grid;
     this.mixer = null;
     this.obstacles = obstacles;
@@ -12,8 +13,8 @@ export class Player {
     this.rotationSpeed = Math.PI / 2;
     this.currentAnimation = null;
 
-    this.loader = new GLTFLoader();
-    this.loader.load("/models/player.glb", (gltf) => {
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.load("/models/player.glb", (gltf) => {
       this.player = gltf.scene;
       this.player.position.set(0, 0, 0);
       this.scene.add(this.player);
@@ -27,7 +28,7 @@ export class Player {
       const rightHand = this.player.getObjectByName("LowerArmR");
       console.log(rightHand);
       if (rightHand) {
-        this.loader.load("/models/shovel.glb", (gltf) => {
+        this.gltfLoader.load("/models/shovel.glb", (gltf) => {
           const shovel = gltf.scene;
 
           rightHand.add(shovel);
@@ -38,6 +39,16 @@ export class Player {
       }
 
       this.playAnimation("Idle");
+    });
+
+    this.audioListener = new THREE.AudioListener();
+    this.camera.add(this.audioListener);
+    this.audioLoader = new THREE.AudioLoader();
+    this.sound = new THREE.Audio(this.audioListener);
+
+    this.audioLoader.load("/sounds/shovel.mp3", (buffer) => {
+      this.sound.setBuffer(buffer);
+      this.sound.setVolume(1);
     });
 
     this.initKeyBoardControls();
@@ -104,6 +115,12 @@ export class Player {
     );
   }
 
+  playPickupSound() {
+    console.log("PLayed");
+    if (this.sound.isPlaying) this.sound.stop(); // Stop if already playing
+    this.sound.play();
+  }
+
   update(deltaTime) {
     if (!this.player || !this.mixer) return;
 
@@ -146,6 +163,7 @@ export class Player {
 
     if (this.keys["KeyE"]) {
       this.playAnimation("PickUp");
+      this.playPickupSound();
     } else if (running) {
       this.playAnimation("Run");
     } else if (moving) {

@@ -35,7 +35,7 @@ const tiles = grid.tiles;
 const tree = new Tree(scene);
 
 // Create player
-const player = new Player(scene, [tree], grid);
+const player = new Player(scene, camera, [tree], grid);
 player.tiles = tiles;
 
 // Clock for delta time
