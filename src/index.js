@@ -28,7 +28,7 @@ const mouse = new THREE.Vector2();
 let intersectedTile = null;
 
 // Create a Grid
-const grid = new Grid(scene, 5);
+const grid = new Grid(scene);
 const tiles = grid.tiles;
 
 // const gridHelper = new THREE.AxesHelper(5);

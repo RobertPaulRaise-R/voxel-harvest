@@ -89,9 +89,11 @@ export class Player {
 
     let moving = false;
     const direction = new THREE.Vector3();
+
     if (this.keys["KeyW"] || this.keys["ArrowUp"]) {
-      direction.x += Math.sin(this.player.rotation.y);
-      direction.z += Math.cos(this.player.rotation.y);
+      let speed = this.keys["Shift"] ? 2 : 1;
+      direction.x += Math.sin(this.player.rotation.y) * speed;
+      direction.z += Math.cos(this.player.rotation.y) * speed;
       moving = true;
     }
     if (this.keys["KeyS"] || this.keys["ArrowDown"]) {
@@ -114,7 +116,11 @@ export class Player {
       if (!this.checkCollision(newPosition)) {
         this.player.position.copy(newPosition);
       }
-      this.playAnimation("Walk");
+      if (this.keys["Shift"]) {
+        this.playAnimation("Run");
+      } else {
+        this.playAnimation("Walk");
+      }
     } else {
       this.playAnimation("Idle");
     }

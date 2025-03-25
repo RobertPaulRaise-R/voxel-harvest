@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
+const loader = new THREE.TextureLoader();
 /**
  * Represents a Tile
  * @class Tile
@@ -20,27 +21,16 @@ export class Tile {
     this.z = z;
 
     // Creating Tile
-    this.tile = null;
-    this.gltfLoader = new GLTFLoader();
-    this.gltfLoader.load(
-      `/models/${tileType}.glb`,
-      (gltf) => {
-        this.tile = gltf.scene;
-        this.tile.position.set(x, 0, z);
-
-        this.tile.scale.set(this.tileSize, this.tileSize / 2, this.tileSize);
-
-        this.scene.add(gltf.scene);
-
-        this.tile.userData.parentTile = this;
-      },
-      (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-      },
-      (error) => {
-        console.error("Error loading model:", error);
-      }
+    this.texture = loader.load("/textures/grass.png", () =>
+      console.log("Loaded")
     );
+    this.geometry = new THREE.PlaneGeometry(tileSize, tileSize);
+    this.material = new THREE.MeshBasicMaterial({ map: this.texture });
+    this.tile = new THREE.Mesh(this.geometry, this.material);
+    this.tile.rotation.x = -Math.PI / 2;
+    this.tile.position.set(x, 0, z);
+
+    this.scene.add(this.tile);
   }
 
   /**

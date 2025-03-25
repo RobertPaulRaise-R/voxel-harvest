@@ -21,7 +21,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Add a tile
-const geometry = new THREE.PlaneGeometry(6, 6);
+const geometry = new THREE.PlaneGeometry(10, 10);
 const material = new THREE.MeshBasicMaterial({
   color: 0x00ff00,
   transparent: true,
@@ -34,7 +34,7 @@ tile2D.position.set(0, 0.03, 0);
 
 scene.add(tile2D);
 
-const tileTile = new Tile(scene, 3, 0, 0);
+const tileTile = new Tile(scene, 10, 0, 0);
 
 setTimeout(() => {
   if (tileTile.mesh && tileTile.mesh.geometry) {
