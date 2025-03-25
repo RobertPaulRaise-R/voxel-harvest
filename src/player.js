@@ -2,8 +2,9 @@ import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
 
 export class Player {
-  constructor(scene, obstacles = []) {
+  constructor(scene, obstacles = [], grid) {
     this.scene = scene;
+    this.grid = grid;
     this.mixer = null;
     this.obstacles = obstacles;
     this.keys = {};
@@ -19,6 +20,7 @@ export class Player {
 
       this.mixer = new THREE.AnimationMixer(this.player);
       this.animations = {};
+      console.log(gltf.animations);
       gltf.animations.forEach((clip) => {
         this.animations[clip.name] = this.mixer.clipAction(clip);
       });
@@ -26,20 +28,6 @@ export class Player {
     });
 
     this.initKeyBoardControls();
-    this.createHighlightMesh();
-  }
-
-  createHighlightMesh() {
-    const highlightMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffff00,
-      transparent: true,
-      opacity: 0.5,
-    });
-    const highlightGeometry = new THREE.PlaneGeometry(1, 1);
-    this.highlightMesh = new THREE.Mesh(highlightGeometry, highlightMaterial);
-    this.highlightMesh.rotation.x = -Math.PI / 2;
-    this.highlightMesh.visible = false;
-    this.scene.add(this.highlightMesh);
   }
 
   initKeyBoardControls() {
@@ -69,19 +57,6 @@ export class Player {
     return this.obstacles.some(
       (obj) => obj.boundingBox && playerBox.intersectsBox(obj.boundingBox)
     );
-  }
-
-  highlightTile(tile) {
-    if (!tile) {
-      this.highlightMesh.visible = false;
-      return;
-    }
-    this.highlightMesh.position.set(
-      tile.position.x,
-      tile.position.y + 0.01,
-      tile.position.z
-    );
-    this.highlightMesh.visible = true;
   }
 
   update(deltaTime) {
@@ -125,9 +100,11 @@ export class Player {
       this.playAnimation("Idle");
     }
 
-    const tile = this.getTileUnderPlayer?.();
-    console.log(this.player.position);
-    this.highlightTile(tile);
+    this.grid.updatePlayerPosition(
+      this.player.position.x,
+      this.player.position.z
+    );
+    // console.log(this.player.position);
     this.mixer.update(deltaTime);
   }
 }

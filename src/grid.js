@@ -1,5 +1,7 @@
+import { Vector3 } from "three";
 import { mapData } from "./gameMap";
 import { Tile } from "./tile";
+import { TileHighliter } from "./tileHighlighter";
 
 /**
  * Represents a Grid
@@ -17,10 +19,13 @@ export class Grid {
     this.tileSize = 5;
     this.position = { x: 0, z: 0 };
     this.tiles = [];
+    this.player = { position: new Vector3(0, 0, 0) };
+    this.highlighter = new TileHighliter(this.scene, this.tileSize);
 
-    console.log(this.row, this.col);
+    console.log(this.playerPosition);
 
     this.createGrid();
+    this.scene.add(this.highlighter);
   }
 
   /**
@@ -37,5 +42,20 @@ export class Grid {
         this.tiles.push(tile);
       }
     }
+  }
+
+  updatePlayerPosition(newX, newZ) {
+    this.playerPosition = { x: newX, z: newZ };
+
+    // Check if the player is standing on a tile
+    this.tiles.forEach((tile) => {
+      if (
+        Math.abs(tile.x - newX) < this.tileSize / 2 &&
+        Math.abs(tile.z - newZ) < this.tileSize / 2
+      ) {
+        console.log(`${tile.x} ${tile.z}`);
+        this.highlighter.updatePosition(tile.x, tile.z);
+      }
+    });
   }
 }

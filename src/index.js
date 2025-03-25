@@ -31,18 +31,15 @@ let intersectedTile = null;
 const grid = new Grid(scene);
 const tiles = grid.tiles;
 
-// const gridHelper = new THREE.AxesHelper(5);
-// scene.add(gridHelper);
-
-// Clock for delta time
-const clock = new THREE.Clock();
-
 // Create a tree
 const tree = new Tree(scene);
 
 // Create player
-const player = new Player(scene, [tree]);
+const player = new Player(scene, [tree], grid);
 player.tiles = tiles;
+
+// Clock for delta time
+const clock = new THREE.Clock();
 
 // Add the player to the scene
 
