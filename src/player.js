@@ -108,14 +108,22 @@ export class Player {
     if (!this.player || !this.mixer) return;
 
     let moving = false;
+    let running = false;
     const direction = new THREE.Vector3();
 
+    let speed = 1; // Default walk speed
+
     if (this.keys["KeyW"] || this.keys["ArrowUp"]) {
-      let speed = this.keys["Shift"] ? 2 : 1;
+      if (this.keys["ShiftLeft"] || this.keys["ShiftRight"]) {
+        speed = 2; // Increase speed for running
+        running = true;
+      }
+
       direction.x += Math.sin(this.player.rotation.y) * speed;
       direction.z += Math.cos(this.player.rotation.y) * speed;
       moving = true;
     }
+
     if (this.keys["KeyS"] || this.keys["ArrowDown"]) {
       direction.x -= Math.sin(this.player.rotation.y);
       direction.z -= Math.cos(this.player.rotation.y);
@@ -130,30 +138,34 @@ export class Player {
       moving = true;
     }
 
-    // Don't override animation while PickUp is playing
+    // Prevent overriding "PickUp" animation while it's playing
     if (this.currentAnimation === "PickUp") {
       this.mixer.update(deltaTime);
       return;
     }
 
-    if (this.keys["KeyE"] && this.currentAnimation !== "PickUp") {
+    if (this.keys["KeyE"]) {
       this.playAnimation("PickUp");
+    } else if (running) {
+      this.playAnimation("Run");
     } else if (moving) {
-      direction.normalize().multiplyScalar(this.speed * deltaTime);
+      this.playAnimation("Walk");
+    } else {
+      this.playAnimation("Idle");
+    }
+
+    if (moving) {
+      direction.normalize().multiplyScalar(this.speed * speed * deltaTime); // Multiply speed correctly
       const newPosition = this.player.position.clone().add(direction);
       if (!this.checkCollision(newPosition)) {
         this.player.position.copy(newPosition);
       }
-      this.playAnimation("Walk");
-    } else {
-      this.playAnimation("Idle");
     }
 
     this.grid.updatePlayerPosition(
       this.player.position.x,
       this.player.position.z
     );
-
     this.mixer.update(deltaTime);
   }
 }
