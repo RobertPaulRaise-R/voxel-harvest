@@ -20,10 +20,23 @@ export class Player {
 
       this.mixer = new THREE.AnimationMixer(this.player);
       this.animations = {};
-      console.log(gltf.animations);
       gltf.animations.forEach((clip) => {
         this.animations[clip.name] = this.mixer.clipAction(clip);
       });
+
+      const rightHand = this.player.getObjectByName("LowerArmR");
+      console.log(rightHand);
+      if (rightHand) {
+        this.loader.load("/models/shovel.glb", (gltf) => {
+          const shovel = gltf.scene;
+
+          rightHand.add(shovel);
+
+          shovel.scale.set(0.03, 0.03, 0.03);
+          shovel.position.set(0.0001, 0.006, -0.0003);
+        });
+      }
+
       this.playAnimation("Idle");
     });
 
@@ -39,17 +52,49 @@ export class Player {
     });
   }
 
+  isMoving() {
+    return (
+      this.keys["KeyW"] ||
+      this.keys["ArrowUp"] ||
+      this.keys["KeyS"] ||
+      this.keys["ArrowDown"] ||
+      this.keys["KeyA"] ||
+      this.keys["ArrowLeft"] ||
+      this.keys["KeyD"] ||
+      this.keys["ArrowRight"]
+    );
+  }
+
   playAnimation(animationName) {
-    if (
-      !this.animations[animationName] ||
-      this.currentAnimation === animationName
-    )
-      return;
+    if (!this.animations[animationName]) return;
+
+    if (this.currentAnimation === animationName) return;
     this.currentAnimation = animationName;
+
+    // Stop all other animations
     Object.values(this.animations).forEach((animation) =>
       animation.fadeOut(0.2)
     );
-    this.animations[animationName].reset().fadeIn(0.2).play();
+
+    const action = this.animations[animationName];
+
+    if (animationName === "PickUp") {
+      action.reset();
+      action.setLoop(THREE.LoopOnce); // Play once
+      action.clampWhenFinished = true; // Hold last frame
+      action.play();
+
+      // Remove any previous listeners to avoid duplicates
+      this.mixer.removeEventListener("finished");
+
+      this.mixer.addEventListener("finished", (e) => {
+        if (e.action === action) {
+          this.playAnimation(this.isMoving() ? "Walk" : "Idle");
+        }
+      });
+    } else {
+      action.reset().fadeIn(0.2).play();
+    }
   }
 
   checkCollision(newPosition) {
@@ -85,17 +130,21 @@ export class Player {
       moving = true;
     }
 
-    if (moving) {
+    // Don't override animation while PickUp is playing
+    if (this.currentAnimation === "PickUp") {
+      this.mixer.update(deltaTime);
+      return;
+    }
+
+    if (this.keys["KeyE"] && this.currentAnimation !== "PickUp") {
+      this.playAnimation("PickUp");
+    } else if (moving) {
       direction.normalize().multiplyScalar(this.speed * deltaTime);
       const newPosition = this.player.position.clone().add(direction);
       if (!this.checkCollision(newPosition)) {
         this.player.position.copy(newPosition);
       }
-      if (this.keys["Shift"]) {
-        this.playAnimation("Run");
-      } else {
-        this.playAnimation("Walk");
-      }
+      this.playAnimation("Walk");
     } else {
       this.playAnimation("Idle");
     }
@@ -104,7 +153,7 @@ export class Player {
       this.player.position.x,
       this.player.position.z
     );
-    // console.log(this.player.position);
+
     this.mixer.update(deltaTime);
   }
 }

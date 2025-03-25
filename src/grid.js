@@ -22,10 +22,7 @@ export class Grid {
     this.player = { position: new Vector3(0, 0, 0) };
     this.highlighter = new TileHighliter(this.scene, this.tileSize);
 
-    console.log(this.playerPosition);
-
     this.createGrid();
-    this.scene.add(this.highlighter);
   }
 
   /**
@@ -38,7 +35,20 @@ export class Grid {
         const posX = x * this.tileSize;
         const posZ = z * this.tileSize;
 
-        const tile = new Tile(this.scene, this.tileSize, posX, posZ);
+        let tile;
+
+        if (mapData[x][z] === 0) {
+          tile = new Tile(this.scene, this.tileSize, posX, posZ);
+        }
+
+        if (mapData[x][z] === 1) {
+          tile = new Tile(this.scene, this.tileSize, posX, posZ);
+        }
+
+        if (mapData[x][z] === 2) {
+          tile = new Tile(this.scene, this.tileSize, posX, posZ, "soil");
+        }
+
         this.tiles.push(tile);
       }
     }
@@ -53,7 +63,6 @@ export class Grid {
         Math.abs(tile.x - newX) < this.tileSize / 2 &&
         Math.abs(tile.z - newZ) < this.tileSize / 2
       ) {
-        console.log(`${tile.x} ${tile.z}`);
         this.highlighter.updatePosition(tile.x, tile.z);
       }
     });

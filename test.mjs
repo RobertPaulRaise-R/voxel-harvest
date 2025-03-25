@@ -1,7 +1,6 @@
 import * as THREE from "three";
-import { Tile } from "./src/tile.js";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { TileHighliter } from "./src/tileHighlighter.js";
+import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
+import { Player } from "./src/player";
 
 // Scene setup
 const scene = new THREE.Scene();
@@ -21,9 +20,42 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const tileTile = new Tile(scene, 10, 0, 0);
+const textureLoader = new THREE.TextureLoader();
+const gltfLoader = new GLTFLoader();
 
-const tileHighlighter = new TileHighliter(scene, 10);
+// const player = new Player(scene);
+function printBones(object) {
+  object.traverse((child) => {
+    if (child.isBone) {
+      console.log(`Bone: ${child.name}`);
+    }
+  });
+}
+
+let mixer;
+
+gltfLoader.load("/models/player.glb", (gltf) => {
+  const player = gltf.scene;
+  scene.add(gltf.scene);
+
+  mixer = new THREE.AnimationMixer(player);
+  console.log(gltf.animations);
+
+  const action = mixer.clipAction(gltf.animations[4]);
+  action.play();
+
+  const rightHand = player.getObjectByName("LowerArmR");
+  if (rightHand) {
+    gltfLoader.load("/models/shovel.glb", (gltf) => {
+      const shovel = gltf.scene;
+
+      rightHand.add(shovel);
+
+      shovel.scale.set(0.03, 0.03, 0.03);
+      shovel.position.set(0.0001, 0.006, -0.0003);
+    });
+  }
+});
 
 // Add Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
@@ -41,11 +73,14 @@ controls.minDistance = 2; // Minimum zoom distance
 controls.maxDistance = 50; // Maximum zoom distance
 controls.target.set(0, 0, 0); // Focus on the tile
 
+const clock = new THREE.Clock();
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
 
   controls.update();
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta); // Update animations
 
   renderer.render(scene, camera);
 }

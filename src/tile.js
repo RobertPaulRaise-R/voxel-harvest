@@ -14,16 +14,14 @@ export class Tile {
    * @param {number} z
    * @param {string} tileType
    */
-  constructor(scene, tileSize, x, z, tileType = "grass_tile2") {
+  constructor(scene, tileSize, x, z, texture = "grass") {
     this.scene = scene;
     this.tileSize = tileSize;
     this.x = x;
     this.z = z;
 
     // Creating Tile
-    this.texture = loader.load("/textures/grass.png", () =>
-      console.log("Loaded")
-    );
+    this.texture = loader.load(`/textures/${texture}.png`);
     this.geometry = new THREE.PlaneGeometry(tileSize, tileSize);
     this.material = new THREE.MeshBasicMaterial({ map: this.texture });
     this.tile = new THREE.Mesh(this.geometry, this.material);
@@ -31,29 +29,5 @@ export class Tile {
     this.tile.position.set(x, 0, z);
 
     this.scene.add(this.tile);
-  }
-
-  /**
-   * Change the color of the tile when hovered
-   * @method
-   */
-  onHover() {
-    this.material.color.setHex(0x00ff00); // Green color
-  }
-
-  /**
-   * Reset the color of the tile when not hovered
-   * @method
-   */
-  onHoverOut() {
-    this.material.color.setHex(0xffffff); //
-  }
-
-  /**
-   * Log the position of the tile when clicked
-   * @method
-   */
-  onClick() {
-    console.log(`Tile at (${this.x}, ${this.z}) clicked`);
   }
 }

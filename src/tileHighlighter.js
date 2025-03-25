@@ -7,7 +7,7 @@ export class TileHighliter {
     this.material = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.1,
     });
     this.tileHighlighter = new THREE.Mesh(this.geometry, this.material);
     this.tileHighlighter.rotation.x = -Math.PI / 2;
