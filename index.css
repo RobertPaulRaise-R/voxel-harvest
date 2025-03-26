@@ -1,0 +1,25 @@
+#quick-inventory {
+  position: absolute;
+  bottom: 5px;
+  transform: translateX(75%);
+  display: flex;
+  gap: 20px;
+}
+
+#quick-inventory img {
+  height: 50px;
+  width: 50px;
+}
+
+@media screen and (orientation: portrait) {
+  body {
+    transform: rotate(90deg);
+    transform-origin: center;
+    width: 100vh;
+    height: 100vw;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+}

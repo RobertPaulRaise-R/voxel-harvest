@@ -14,6 +14,12 @@ const camera = new THREE.PerspectiveCamera(
   1000
 );
 
+const qi = document.querySelector("#quick-inventory");
+
+qi.addEventListener("click", (e) => {
+  console.log("Clicked");
+});
+
 // Adjust the camera to center the map
 // camera.position.set(0, 40, );
 
@@ -89,6 +95,16 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+});
+
+window.addEventListener("orientationchange", () => {
+  if (window.orientation === 90 || window.orientation === -90) {
+    console.log("Landscape mode");
+    document.body.style.transform = "rotate(0deg)";
+  } else {
+    console.log("Portrait mode");
+    document.body.style.transform = "rotate(90deg)";
+  }
 });
 
 // // Setup Dat.GUI

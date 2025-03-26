@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { mapData } from "./gameMap";
 import { Tile } from "./tile";
 import { TileHighliter } from "./tileHighlighter";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 /**
  * Represents a Grid

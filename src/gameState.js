@@ -1,71 +1,32 @@
-export class GameState {
-  constructor() {
-    // Game mechanics tracking
-    this.time = 0;
-    this.day = 1;
-    this.season = "spring";
-    this.weather = {
-      current: "clear",
-      temperature: 20,
-      precipitation: 0,
-    };
-    this.crops = [];
-    this.inventory = [];
-  }
+export const gameState = {
+  time: 0, // "30 mins is one day"
+  isDay: time <= 15,
+  season: "spring",
+  weather: {
+    current: "clear", // "clear", "sunny", "rainy", "snowy",
+    temperature: 20,
+    precipitation: 0,
+  },
 
-  update(deltaTime) {
-    this.time += deltaTime;
+  grid: [
+    [
+      { type: "grass", state: "empty", water: 0 }, // type: "grass", "road", "path"
+      { type: "road", state: "empty", water: 0 }, // state: "soil", "dirt", "fertile",
+    ], // Example grid
+  ],
+  crop: 0, // 0 1 2 4    4 Stages of crop growing
 
-    // Update day cycle
-    if (this.time >= 86400) {
-      // 24 hours in seconds
-      this.day++;
-      this.time = 0;
-      this.updateSeason();
-    }
-
-    // Weather system
-    this.updateWeather(deltaTime);
-
-    // Crop growth
-    this.updateCrops(deltaTime);
-  }
-
-  updateSeason() {
-    const seasons = ["spring", "summer", "autumn", "winter"];
-    const currentSeasonIndex = seasons.indexOf(this.season);
-    this.season = seasons[(currentSeasonIndex + 1) % 4];
-  }
-
-  updateWeather(deltaTime) {
-    // Simple weather simulation
-    if (Math.random() < 0.01) {
-      // 1% chance of weather change
-      this.changeWeather();
-    }
-  }
-
-  changeWeather() {
-    const weatherTypes = [
-      { type: "clear", temp: 20 },
-      { type: "rainy", temp: 15 },
-      { type: "stormy", temp: 10 },
-      { type: "cloudy", temp: 18 },
-    ];
-
-    const newWeather =
-      weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-    this.weather = {
-      current: newWeather.type,
-      temperature: newWeather.temp,
-      precipitation: Math.random(),
-    };
-  }
-
-  updateCrops(deltaTime) {
-    // Placeholder for crop growth mechanics
-    this.crops.forEach((crop) => {
-      // Implement crop growth logic
-    });
-  }
-}
+  player: {
+    player1: {
+      position: { x: 0, y: 0 },
+      money: 10000,
+      maxWeight: 50, // Max weight the player can carry
+      currentWeight: 0, // Updates dynamically
+      inventory: [
+        { id: "wheat_seed", quantity: 10, weight: 0.2 },
+        { id: "watering_can", quantity: 1, weight: 2.0 },
+        { id: "fertilizer", quantity: 5, weight: 1 },
+      ],
+    },
+  },
+};

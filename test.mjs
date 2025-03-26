@@ -1,5 +1,9 @@
 import * as THREE from "three";
-import { GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
+import {
+  GLTFLoader,
+  OrbitControls,
+  SimplifyModifier,
+} from "three/examples/jsm/Addons.js";
 import { Player } from "./src/player";
 
 // Scene setup
@@ -32,29 +36,24 @@ function printBones(object) {
   });
 }
 
-let mixer;
+let mesh;
 
-gltfLoader.load("/models/player.glb", (gltf) => {
-  const player = gltf.scene;
-  scene.add(gltf.scene);
+gltfLoader.load("/models/dirt_tile.glb", (gltf) => {
+  mesh = gltf.scene;
 
-  mixer = new THREE.AnimationMixer(player);
-  console.log(gltf.animations);
-
-  const action = mixer.clipAction(gltf.animations[4]);
-  action.play();
-
-  const rightHand = player.getObjectByName("LowerArmR");
-  if (rightHand) {
-    gltfLoader.load("/models/shovel.glb", (gltf) => {
-      const shovel = gltf.scene;
-
-      rightHand.add(shovel);
-
-      shovel.scale.set(0.03, 0.03, 0.03);
-      shovel.position.set(0.0001, 0.006, -0.0003);
-    });
+  // Ensure the model has a mesh
+  const originalMesh = mesh.children[0]; // Assuming the first child is the mesh
+  if (!originalMesh) {
+    console.error("No mesh found in the GLTF scene!");
+    return;
   }
+
+  // Apply simplification
+  const modifier = new SimplifyModifier();
+  const simplified = modifier.modify(originalMesh.geometry, 1);
+
+  originalMesh.geometry = simplified; // Replace original geometry with the simplified one
+  scene.add(mesh);
 });
 
 // Add Lighting
@@ -73,14 +72,11 @@ controls.minDistance = 2; // Minimum zoom distance
 controls.maxDistance = 50; // Maximum zoom distance
 controls.target.set(0, 0, 0); // Focus on the tile
 
-const clock = new THREE.Clock();
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
 
   controls.update();
-  const delta = clock.getDelta();
-  if (mixer) mixer.update(delta); // Update animations
 
   renderer.render(scene, camera);
 }
