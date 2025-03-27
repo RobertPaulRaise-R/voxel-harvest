@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { Grid } from "./grid";
 import { Player } from "./player";
 import { Tree } from "./tree";
+import { GameMap } from "./gameMap";
+import { mapData } from "./constants/mapData";
 
 // Scece setup
 const scene = new THREE.Scene();
@@ -34,14 +36,16 @@ const mouse = new THREE.Vector2();
 let intersectedTile = null;
 
 // Create a Grid
-const grid = new Grid(scene);
-const tiles = grid.tiles;
+// const grid = new Grid(scene);
+const gameMap = new GameMap(mapData);
+gameMap.initialize(scene);
+const tiles = gameMap.tiles;
 
 // Create a tree
 const tree = new Tree(scene);
 
 // Create player
-const player = new Player(scene, camera, [tree], grid);
+const player = new Player(scene, camera, [tree], gameMap);
 player.tiles = tiles;
 
 // Clock for delta time

@@ -8,13 +8,19 @@ const loader = new THREE.TextureLoader();
  */
 export class Tile {
   /**
-   * @param {THREE.Scene} scene
    * @param {number} tileSize
    * @param {number} x
    * @param {number} z
-   * @param {string} tileType
+   * @param {string} texture
    */
-  constructor(scene, tileSize, x, z, texture = "grass", brightness = 1) {
+  constructor(
+    scene,
+    tileSize,
+    x,
+    z,
+    texture = "minecraft-grass",
+    brightness = 1
+  ) {
     this.scene = scene;
     this.tileSize = tileSize;
     this.brightness = brightness;

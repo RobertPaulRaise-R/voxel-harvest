@@ -162,7 +162,7 @@ export class Player {
     if (this.keys["KeyE"] && !this.ePressed) {
       this.playAnimation("PickUp");
       this.playShovelSound();
-      this.grid.updateTileUnderPlayer();
+      // this.grid.updateTileUnderPlayer();
       this.ePressed = false;
     } else if (running) {
       this.playAnimation("Run");
@@ -180,10 +180,10 @@ export class Player {
       }
     }
 
-    this.grid.updatePlayerPosition(
-      this.player.position.x,
-      this.player.position.z
-    );
+    // this.grid.updatePlayerPosition(
+    //   this.player.position.x,
+    //   this.player.position.z
+    // );
     this.mixer.update(deltaTime);
   }
 }

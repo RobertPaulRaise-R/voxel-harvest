@@ -1,15 +1,23 @@
-export const mapData = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Wall row
-  [0, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0], // Grass row
-  [0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 0], // Soil row
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], // Grass row
-  [0, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0], // Grass ro0
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Wall row
-];
+import * as THREE from "three";
+import { ChunkGenerator } from "./chunkGenerator";
+
+export class GameMap {
+  constructor(mapData) {
+    this.chunkGenerator = new ChunkGenerator(mapData, 4, 1);
+    this.tiles = [];
+  }
+
+  initialize(scene) {
+    const chunks = this.chunkGenerator.generateAllChunks();
+
+    console.log(`Generated ${chunks.length} chunks`);
+
+    chunks.forEach((chunk, index) => {
+      console.log(`Chunk ${index} position:`, chunk.position);
+      scene.add(chunk);
+    });
+
+    this.tiles = this.chunkGenerator.tiles;
+    console.log(this.tiles);
+  }
+}

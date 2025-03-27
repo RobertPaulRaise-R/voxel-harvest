@@ -4,7 +4,8 @@ import {
   OrbitControls,
   SimplifyModifier,
 } from "three/examples/jsm/Addons.js";
-import { Player } from "./src/player";
+import { GameMap } from "./src/gameMap";
+import { mapData } from "./src/constants/mapData";
 
 // Scene setup
 const scene = new THREE.Scene();
@@ -27,34 +28,8 @@ document.body.appendChild(renderer.domElement);
 const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new GLTFLoader();
 
-// const player = new Player(scene);
-function printBones(object) {
-  object.traverse((child) => {
-    if (child.isBone) {
-      console.log(`Bone: ${child.name}`);
-    }
-  });
-}
-
-let mesh;
-
-gltfLoader.load("/models/dirt_tile.glb", (gltf) => {
-  mesh = gltf.scene;
-
-  // Ensure the model has a mesh
-  const originalMesh = mesh.children[0]; // Assuming the first child is the mesh
-  if (!originalMesh) {
-    console.error("No mesh found in the GLTF scene!");
-    return;
-  }
-
-  // Apply simplification
-  const modifier = new SimplifyModifier();
-  const simplified = modifier.modify(originalMesh.geometry, 1);
-
-  originalMesh.geometry = simplified; // Replace original geometry with the simplified one
-  scene.add(mesh);
-});
+const gameMap = new GameMap(mapData);
+gameMap.initialize(scene);
 
 // Add Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);

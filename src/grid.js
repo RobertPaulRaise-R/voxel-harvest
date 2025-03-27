@@ -1,8 +1,7 @@
 import { Vector3 } from "three";
-import { mapData } from "./gameMap";
+import { mapData } from "./constants/mapData";
 import { Tile } from "./tile";
 import { TileHighliter } from "./tileHighlighter";
-import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 /**
  * Represents a Grid
@@ -47,7 +46,14 @@ export class Grid {
         }
 
         if (mapData[x][z] === 2) {
-          tile = new Tile(this.scene, this.tileSize, posX, posZ, "dirt", 0.3);
+          tile = new Tile(
+            this.scene,
+            this.tileSize,
+            posX,
+            posZ,
+            "minecraft-dirt",
+            0.3
+          );
         }
 
         this.tiles.push(tile);
@@ -62,7 +68,7 @@ export class Grid {
         Math.abs(tile.z - this.playerPosition.z) < this.tileSize / 2
       ) {
         setTimeout(() => {
-          tile.updateTexture("dirt"); // Assuming you have a method in Tile to update the texture
+          tile.updateTexture("minecraft-dirt"); // Assuming you have a method in Tile to update the texture
         }, 500);
       }
     });
