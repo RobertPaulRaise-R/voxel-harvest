@@ -9,6 +9,15 @@ export class ECS {
     return entity;
   }
 
+  findEntityWithComponent(name: string): number | null {
+    for (const [entity, components] of this.components) {
+      if (components.has(name)) {
+        return entity;
+      }
+    }
+    return null;
+  }
+
   addComponent<T>(entity: number, name: string, component: T) {
     if (!this.components.has(entity)) return;
     this.components.get(entity)?.set(name, component);
