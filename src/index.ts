@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { Grid } from "./grid";
 import { Player } from "./player";
 import { Tree } from "./tree";
 import { GameMap } from "./gameMap";

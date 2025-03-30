@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  server: {
-    mimeTypes: {
-      js: "application/javascript",
-    },
+  plugins: [tsconfigPaths()],
+  resolve: {
+    extensions: [".ts", ".js"],
   },
 });
