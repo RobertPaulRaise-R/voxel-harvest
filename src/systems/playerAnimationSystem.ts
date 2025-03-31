@@ -32,14 +32,11 @@ export function playerAnimationSystem(
         acc[clip.name] = clip;
         return acc;
       }, {} as Record<string, THREE.AnimationClip>);
-      console.log("✅ Animations stored:", Object.keys(animations));
     }
 
     let actionName = "Idle"; // Default animation
     if (player.speed > 0) actionName = "Walk";
     if (player.speed > 5) actionName = "Run";
-
-    console.log("🔄 Requested Animation:", actionName);
 
     if (!animations[actionName]) {
       return;

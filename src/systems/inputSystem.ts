@@ -1,6 +1,5 @@
 const keys: Record<string, boolean> = {};
 
-console.log(keys);
 window.addEventListener("keydown", (event) => {
   keys[event.code] = true;
 });

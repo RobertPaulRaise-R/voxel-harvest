@@ -1,16 +1,15 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/Addons";
 
 import { ECS } from "./ecs";
 import { movementSystem } from "./systems/movementSystem";
 import { renderSystem } from "./systems/renderSystem";
-import { PlayerComponent } from "./components/Player";
-import { RenderComponent } from "./components/Render";
-import { PositionComponent } from "./components/Position";
 import { chunkSystem } from "./systems/chunkSystem";
 import { createHighlightSystem } from "./systems/tileHighlightSystem";
 import { cameraFollowSystem } from "./systems/cameraFollowSystem";
-import { playerAnimationSystem } from "./systems/playerAnimationSystem";
+import { createPlayer } from "./entities/createPlayer";
+import { mapData } from "./constants/mapData";
+import { Sky } from "three/examples/jsm/Addons";
+import { tileRenderSystem } from "./systems/tileRenderingSystem";
 
 const scene = new THREE.Scene();
 
@@ -20,7 +19,9 @@ const camera = new THREE.PerspectiveCamera(
   0.5,
   1000
 );
-camera.position.set(-5, 10, 20);
+camera.position.set(0, 30, 0);
+camera.lookAt(0, 0, 0);
+// camera.up.set(0, 0, -1);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -30,60 +31,25 @@ document.body.appendChild(renderer.domElement);
 const ecs = new ECS();
 ecs.addSystem(movementSystem(ecs));
 ecs.addSystem(renderSystem(ecs));
+
+// Creating Player Entity
+const { playerEntity, mixer } = createPlayer(ecs, scene);
+
+// Adding player following camera system
 ecs.addSystem(cameraFollowSystem(ecs, camera));
 
-const playerEntity = ecs.createEntity();
-ecs.addComponent(playerEntity, "Position", {
-  x: 0,
-  y: 0,
-  z: 0,
-} as PositionComponent);
-ecs.addComponent(playerEntity, "Player", { speed: 5 } as PlayerComponent);
+// For testing
+const geometry = new THREE.PlaneGeometry(10, 10);
+const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+const mesh = new THREE.Mesh(geometry, material);
+mesh.rotation.x = -Math.PI / 2;
+mesh.position.set(-10, 0, -10);
+scene.add(mesh);
 
-ecs.addSystem(chunkSystem(ecs, scene, playerEntity));
+const chunkSystemInstance = chunkSystem(ecs, scene, mapData, 2, 4);
+chunkSystemInstance.preloadChunks();
 
-let mixer: THREE.AnimationMixer | null = null;
-
-// Player Model Loader
-const gltfLoader = new GLTFLoader();
-gltfLoader.load(
-  "/models/player.glb",
-  (gltf) => {
-    const playerModel = gltf.scene;
-    playerModel.animations = gltf.animations;
-    scene.add(playerModel);
-
-    ecs.addComponent(playerEntity, "Render", {
-      mesh: playerModel,
-      animations: gltf.animations, // ✅ Attach animations manually
-    } as unknown as RenderComponent);
-
-    mixer = new THREE.AnimationMixer(playerModel);
-
-    gltf.animations.forEach((anim, index) => {
-      console.log(`Animation ${index}:`, anim.name);
-    });
-
-    const idleAction = mixer.clipAction(gltf.animations[11]);
-    idleAction.play();
-
-    console.log("✅ Player Model Loaded, Adding Animation System");
-
-    ecs.addSystem(playerAnimationSystem(ecs, mixer));
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading model:", error);
-  }
-);
-
-const chunks = ecs.getComponent(0, "Chunks") as Map<
-  string,
-  THREE.InstancedMesh
->; // Pass your existing chunk map
-createHighlightSystem(scene, camera, renderer, chunks);
-
-camera.lookAt(5, 0, 10);
+createHighlightSystem(scene, camera, renderer, chunkSystemInstance.chunkCache);
 
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(5, 5, 5);
@@ -92,7 +58,36 @@ scene.add(light);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
+const sky = new Sky();
+sky.scale.setScalar(1000); // Make it large enough
+
+scene.add(sky);
+
+// Sky Uniforms for Adjusting Atmosphere
+const skyUniforms = sky.material.uniforms;
+skyUniforms["turbidity"].value = 10; // Haze
+skyUniforms["rayleigh"].value = 3; // Blue sky intensity
+skyUniforms["mieCoefficient"].value = 0.005;
+skyUniforms["mieDirectionalG"].value = 0.8;
+
+// Sun Position (Determines Time of Day)
+const sun = new THREE.Vector3();
+const phi = THREE.MathUtils.degToRad(-90); // Angle of elevation
+const theta = THREE.MathUtils.degToRad(180); // Direction
+sun.setFromSphericalCoords(1, phi, theta);
+
+skyUniforms["sunPosition"].value.copy(sun);
+
+// Add axes to scene
+scene.add(new THREE.AxesHelper(10));
+
+// Add grid helper
+const grid = new THREE.GridHelper(200, 200);
+scene.add(grid);
+
 const FIXED_DELTA_TIME = 1 / 60;
+const clock = new THREE.Clock();
+
 function animate() {
   requestAnimationFrame(animate);
   const deltaTime = clock.getDelta(); // Assuming 60 FPS
@@ -106,7 +101,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-const clock = new THREE.Clock();
 animate();
 
 window.addEventListener("resize", () => {
